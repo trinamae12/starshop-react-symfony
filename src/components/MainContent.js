@@ -1,16 +1,30 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./sidebar";
+import { Link } from 'react-router-dom';
 
 const MainContent = () => {
     const [ships, setShips] = useState([]);
 
+    const fetchShips = async(signal) => {
+        try {
+            const response = await fetch('https://localhost/api/starships', { signal });
+            const data = await response.json();
+            setShips(data)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     useEffect(() => {
-        fetch('https://localhost/api/starships')
-        .then((response) => {
-            //console.log(response);
-            return response.json();
-        }).then((data) => setShips(data));
-    })
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        fetchShips(signal);
+
+        return () => {
+            controller.abort();
+        }
+    }, []);
 
     const getImage = (status) => {
         if (status === 'in progress') {
@@ -44,11 +58,10 @@ const MainContent = () => {
                                     <p className="uppercase text-xs text-nowrap">{ship.status}</p>
                                 </div>
                                 <h4 className="text-[22px] pt-1 font-semibold">
-                                    <a
+                                    <Link
                                         className="hover:text-slate-200"
-                                        // href="{{ path('app_starship_show', { id: ship.id }) }}"
-                                        href="#"
-                                    >{ship.name}</a>
+                                        to={`/starships/${ship.id}`}
+                                    >{ship.name}</Link>
                                 </h4>
                             </div>
                         </div>

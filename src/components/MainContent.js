@@ -4,27 +4,39 @@ import { Link } from 'react-router-dom';
 
 const MainContent = () => {
     const [ships, setShips] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [loading, setLoading] = useState(false);
 
-    const fetchShips = async(signal) => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const fetchShips = async(signal, page = 1) => {
+        setLoading(true);
         try {
-            const response = await fetch('https://localhost/api/starships', { signal });
-            const data = await response.json();
-            setShips(data)
+            const response = await fetch(`https://localhost/api/starships?page=${page}&limit=5`, { signal });
+            const result = await response.json();
+            setShips(result.data);
+            setTotalPages(result.meta.totalPages);
+            setCurrentPage(result.meta.currentPage);
+            setLoading(false);
         } catch (err) {
-            console.log(err)
+            console.log(err);
+            setLoading(false);
         }
     }
 
     useEffect(() => {
-        const controller = new AbortController();
-        const signal = controller.signal;
-
         fetchShips(signal);
 
         return () => {
             controller.abort();
         }
     }, []);
+
+    useEffect(() => {
+        fetchShips(signal, currentPage)
+    }, [currentPage]);
 
     const getImage = (status) => {
         if (status === 'in progress') {
@@ -33,6 +45,12 @@ const MainContent = () => {
             return "/images/status-complete.png"
         } else {
             return "/images/status-waiting.png"
+        }
+    }
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
         }
     }
 
@@ -45,8 +63,8 @@ const MainContent = () => {
             </h1>
             <button>Add new ship</button>
 
+            {loading ? (<p>Loading...</p>) : (
             <div className="space-y-5">
-                {/* {{<!-- start ship item -->}} */}
                 {ships.map((ship) => (
                     <div key={ship.id} className="bg-[#16202A] rounded-2xl pl-5 py-5 pr-11 flex flex-col min-[1174px]:flex-row min-[1174px]:justify-between">
                         <div className="flex justify-center min-[1174px]:justify-start">
@@ -79,6 +97,38 @@ const MainContent = () => {
                     </div>
                     ))}
                 {/** end ship item */}
+            </div>
+        )}
+            {/** Pagination Controls */}
+            <div className="flex justify-center space-x-2">
+                <button 
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+                >
+                    Previous
+                </button>
+
+                {/* Load all Page Numbers */}
+                {
+                    [...Array(totalPages).keys()].map(pageNumber => (
+                        <button
+                            key={pageNumber + 1}
+                            onClick={() => handlePageChange(pageNumber + 1)}
+                            className={`px-4 py-2 rounded ${currentPage === pageNumber + 1 ? 'bg-blue-700 text-white': 'bg-gray-200'}`}
+                        >
+                            {pageNumber + 1}
+                        </button>
+                    ))
+                }
+
+                <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+                >
+                    Next
+                </button>
             </div>
 
             <p className="text-lg mt-5 text-center md:text-left">

@@ -1,22 +1,27 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
-import Sidebar from './components/sidebar';
 import Footer from './components/Footer';
+import ShipDetails from './pages/ShipDetails';
+import Home from './pages/Home';
 
 function App() {
   return (
-    <div className="text-white" style={{ background: 'radial-gradient(102.21% 102.21% at 50% 28.75%, #00121C 42.62%, #013954 100%)' }}>
-      <div className="flex flex-col justify-between min-h-screen relative">
-        <div>
-            <Header />
-            <MainContent />
-            <Footer /> 
-        </div>
+    <Router>
+          <div className="text-white" style={{ background: 'radial-gradient(102.21% 102.21% at 50% 28.75%, #00121C 42.62%, #013954 100%)' }}>
+    <div className="flex flex-col justify-between min-h-screen relative">
+      <div>
+          <Header />
+            <Routes>
+        <Route path="/" element={<MainContent />}/>
+        <Route path="/starships/:id" element={<ShipDetails />} />
+      </Routes>
+      <Footer />
       </div>
     </div>
+  </div>
+    </Router>
   );
 }
 

@@ -2,41 +2,42 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "./sidebar";
 import { Link } from 'react-router-dom';
 
-const MainContent = () => {
-    const [ships, setShips] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [loading, setLoading] = useState(false);
+// transfer all data retrieval to App.js, main content only for displaying results
+const MainContent = ({ ships, handlePageChange, loading, currentPage, totalPages }) => {
+    // const [ships, setShips] = useState([]);
+    // const [currentPage, setCurrentPage] = useState(1);
+    // const [totalPages, setTotalPages] = useState(1);
+    // const [loading, setLoading] = useState(false);
 
-    const controller = new AbortController();
-    const signal = controller.signal;
+    // const controller = new AbortController();
+    // const signal = controller.signal;
 
-    const fetchShips = async(signal, page = 1) => {
-        setLoading(true);
-        try {
-            const response = await fetch(`https://localhost/api/starships?page=${page}&limit=5`, { signal });
-            const result = await response.json();
-            setShips(result.data);
-            setTotalPages(result.meta.totalPages);
-            setCurrentPage(result.meta.currentPage);
-            setLoading(false);
-        } catch (err) {
-            console.log(err);
-            setLoading(false);
-        }
-    }
+    // const fetchShips = async(signal, page = 1) => {
+    //     setLoading(true);
+    //     try {
+    //         const response = await fetch(`https://localhost/api/starships?page=${page}&limit=5`, { signal });
+    //         const result = await response.json();
+    //         setShips(result.data);
+    //         setTotalPages(result.meta.totalPages);
+    //         setCurrentPage(result.meta.currentPage);
+    //         setLoading(false);
+    //     } catch (err) {
+    //         console.log(err);
+    //         setLoading(false);
+    //     }
+    // }
 
-    useEffect(() => {
-        fetchShips(signal);
+    // useEffect(() => {
+    //     fetchShips(signal);
 
-        return () => {
-            controller.abort();
-        }
-    }, []);
+    //     return () => {
+    //         controller.abort();
+    //     }
+    // }, []);
 
-    useEffect(() => {
-        fetchShips(signal, currentPage)
-    }, [currentPage]);
+    // useEffect(() => {
+    //     fetchShips(signal, currentPage)
+    // }, [currentPage]);
 
     const getImage = (status) => {
         if (status === 'in progress') {
@@ -48,11 +49,11 @@ const MainContent = () => {
         }
     }
 
-    const handlePageChange = (newPage) => {
-        if (newPage >= 1 && newPage <= totalPages) {
-            setCurrentPage(newPage);
-        }
-    }
+    // const handlePageChange = (newPage) => {
+    //     if (newPage >= 1 && newPage <= totalPages) {
+    //         setCurrentPage(newPage);
+    //     }
+    // }
 
     return (
         <main className="flex flex-col lg:flex-row">
@@ -63,7 +64,9 @@ const MainContent = () => {
             </h1>
             <button>Add new ship</button>
 
-            {loading ? (<p>Loading...</p>) : (
+            {loading ? (<p>Loading...</p>) : 
+            ships.length < 1 ? (<p>No ships found</p>) :
+            (
             <div className="space-y-5">
                 {ships.map((ship) => (
                     <div key={ship.id} className="bg-[#16202A] rounded-2xl pl-5 py-5 pr-11 flex flex-col min-[1174px]:flex-row min-[1174px]:justify-between">
